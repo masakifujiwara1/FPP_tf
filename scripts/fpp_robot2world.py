@@ -2,6 +2,18 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 
+def tf_x(x, y, end_x, end_y, theta):
+    x_ = (x - end_x) * math.cos(theta) + (y - end_y) * math.sin(theta)
+    return x_
+
+def tf_y(x, y, end_x, end_y, theta):
+    y_ = -(x - end_x) * math.sin(theta) + (y - end_y) * math.cos(theta)
+    return y_
+
+# ToDo computing relative pose with (tf_ped - tf_ped2robot)
+def relative_pos():
+    pass
+
 # 軌跡（0 <= t <= 7）
 trajectories = np.array((
     [
@@ -55,37 +67,16 @@ sequence_length = 8
 num_pedestrians = 4
 coordinates = 2
 
-ped1_trajectory = trajectories[0, :, 0, :]
-end_x, end_y = ped1_trajectory[-1]
-
-dx = ped1_trajectory[-1, 0] - ped1_trajectory[-2, 0]
-dy = ped1_trajectory[-1, 1] - ped1_trajectory[-2, 1]
-theta = math.atan2(dy, dx)
-
-# 座標変換を行う関数
-def transform_coordinates(x, y, end_x, end_y, theta):
-    x_ = (x - end_x) * math.cos(theta) + (y - end_y) * math.sin(theta)
-    y_ = -(x - end_x) * math.sin(theta) + (y - end_y) * math.cos(theta)
-    return x_, y_
-
-# 変換後の軌道データを格納する配列
-transformed_trajectories = np.zeros_like(trajectories)
-
-# 各歩行者の軌道データを変換
-for i in range(num_pedestrians):
-    for t in range(sequence_length):
-        x, y = trajectories[0, t, i]
-        x_, y_ = transform_coordinates(x, y, end_x, end_y, theta)
-        transformed_trajectories[0, t, i] = [x_, y_]
+# print(traj.shape) # Vobs = 1, 8, 4, 2
 
 plt.figure(figsize=(10, 10))
 
 colors = ['red', 'blue', 'green', 'orange']
 for i in range(num_pedestrians):
-    # pedestrian_trajectory = transformed_trajectories[0, :, i, :]
+    # pedestrian_trajectory = trajectories[0, :, i, :]
     # plt.plot(pedestrian_trajectory[:, 0], pedestrian_trajectory[:, 1], marker='o', color=colors[i], label=f'Pedestrian {i+1}')
 
-    pedestrian_transformed_relative_trajectory = transformed_trajectories[0, :, i, :]
+    pedestrian_transformed_relative_trajectory = trajectories[0, :, i, :]
     plt.plot(pedestrian_transformed_relative_trajectory[:, 0], pedestrian_transformed_relative_trajectory[:, 1], marker='o', color=colors[i], label=f'Pedestrian {i+1} relative to Pedestrian 1')
     plt.plot(pedestrian_transformed_relative_trajectory[0, 0], pedestrian_transformed_relative_trajectory[0, 1], marker='*', color=colors[i], markersize=12)  # 初めのフレームのマーカーを強調
 

@@ -78,14 +78,25 @@ for i in range(num_pedestrians):
         x_, y_ = transform_coordinates(x, y, end_x, end_y, theta)
         transformed_trajectories[0, t, i] = [x_, y_]
 
+# 1人目の歩行者に対するその他の歩行者の相対位置を計算する関数（変換後）
+def calculate_transformed_relative_positions(transformed_trajectories):
+    transformed_relative_positions = np.zeros_like(transformed_trajectories)
+    ped1_transformed_positions = transformed_trajectories[0, :, 0, :]
+    
+    for i in range(1, num_pedestrians):
+        for t in range(sequence_length):
+            transformed_relative_positions[0, t, i] = transformed_trajectories[0, t, i] - ped1_transformed_positions[t]
+    
+    return transformed_relative_positions
+
+# 変換後の相対位置を計算
+transformed_relative_positions = calculate_transformed_relative_positions(transformed_trajectories)
+
 plt.figure(figsize=(10, 10))
 
 colors = ['red', 'blue', 'green', 'orange']
-for i in range(num_pedestrians):
-    # pedestrian_trajectory = transformed_trajectories[0, :, i, :]
-    # plt.plot(pedestrian_trajectory[:, 0], pedestrian_trajectory[:, 1], marker='o', color=colors[i], label=f'Pedestrian {i+1}')
-
-    pedestrian_transformed_relative_trajectory = transformed_trajectories[0, :, i, :]
+for i in range(1, num_pedestrians):
+    pedestrian_transformed_relative_trajectory = transformed_relative_positions[0, :, i, :]
     plt.plot(pedestrian_transformed_relative_trajectory[:, 0], pedestrian_transformed_relative_trajectory[:, 1], marker='o', color=colors[i], label=f'Pedestrian {i+1} relative to Pedestrian 1')
     plt.plot(pedestrian_transformed_relative_trajectory[0, 0], pedestrian_transformed_relative_trajectory[0, 1], marker='*', color=colors[i], markersize=12)  # 初めのフレームのマーカーを強調
 
